@@ -1,0 +1,45 @@
+<!doctype HTML>
+<html>
+  
+<script type="module">
+import interact from 
+'https://cdn.interactjs.io/v1.10.11/interactjs/index.js'
+
+interact('.item').draggable({
+  listeners: {
+    move (event) {
+      console.log(event.pageX,
+                  event.pageY)
+    }
+  }
+})
+  
+</script>
+<div id="drag-
+         1" class="draggable">
+  <p> You can drag one element </p>
+</div>
+<div id="drag-2" class="draggable">
+  <p> with each pointer </p>
+</div>
+ 	
+  <body style='margin : 0px; overflow: hidden;'>
+    <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false;'>
+      <a-assets> 
+        <video id="video" autoplay loop="false" src="https://maxramgraber.github.io/EGU-meander-AR/output_meander.mp4"></video> 
+      </a-assets>  	
+      <a-marker preset='kanji'>
+        <a-entity rotation="-90 0 0" scale="0.7 0.7 0.7">
+          <a-video src="#video" width="3.5" height="2" position="0.5 0 -2" play-on-window-click></a-video>
+        </a-entity>
+      </a-marker>
+      
+      <a-entity camera>
+        <a-entity cursor="fuse: true; fuseTimeout: 50"
+            position="0 0 -1">
+        </a-entity>
+      </a-entity>
+      
+    </a-scene>
+  </body>
+</html>
