@@ -526,7 +526,10 @@
 
 
         // array of threshold values 
-        var thresholds = d3.range(d3.min(output),d3.max(output),(d3.max(output)- d3.min(output))/21);
+        thresholds = d3.range(
+        d3.min(output) - (d3.max(output)- d3.min(output))/2,
+        d3.max(output) + (d3.max(output)- d3.min(output))/2,
+        (d3.max(output)- d3.min(output))/21);
 
 
         // initialise contours
@@ -662,9 +665,21 @@
               deltaY = current.attr("y") - d3.event.y;
           })
           .on("drag", function () {
+          		var movex = d3.event.x + deltaX;
+              var movey = d3.event.y + deltaY;
+              if (movex < 0.05*width) {
+              	movex = 0.05*width
+              } else if (movex > width*0.95) {
+              	movex = width*0.95
+              }
+              if (movey < 0.05*height) {
+              	movey = 0.05*height
+              } else if (movey > height*0.95) {
+              	movey = height*0.95
+              }
               d3.select(this)
-                  .attr("x", d3.event.x + deltaX)
-                  .attr("y", d3.event.y + deltaY);
+                  .attr("x", movex)
+                  .attr("y", movey);
           })
           .on("end", function () {
               update();
