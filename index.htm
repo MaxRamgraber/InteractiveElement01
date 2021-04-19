@@ -42,11 +42,8 @@
       var x_res			= 51;
       var y_res 		= 51;
       var grid 			= construct_grid([0,1],[0,1],x_res,y_res);
-      print(vertices)
-      
-      //print(grid);
       var output 		= evaluate(grid, vertices, s);
-      //print(output);
+
 
       
 
@@ -510,24 +507,14 @@
 
 
         
-        
+        // Remove the previous elements
         d3.select("#line_element").remove();
         svg.selectAll("path").remove();
-        //var svg = d3.select("#my_dataviz") // This selects the div
-        //  .append("svg") // This creates a canvas
-        //    .attr("width", width) // This defines the canvas' width
-        //    .attr("height", height) // This defines the canvas' height
-        //  .append("g")
-        //    .attr("transform",
-        //          "translate(" + 0 + "," + 0 + ")");
+
 
         // array of threshold values 
         var thresholds = d3.range(d3.min(output),d3.max(output),(d3.max(output)- d3.min(output))/21);
 
-        // color scale  
-        var color = d3.scaleLinear()
-            .domain(d3.extent(thresholds))
-            .interpolate(function() { return d3.interpolateRdBu; });  
 
         // initialise contours
         var contours = d3.contours()
@@ -548,8 +535,9 @@
             .attr("x2",p2[0]*width)
             .attr("y1",p1[1]*height)
             .attr("y2",p2[1]*height)
-            .attr("stroke", "#039BE5")
+            .attr("stroke", "#666666")
             .attr("stroke-width", 10)
+            .attr("stroke-linecap","round")
             .attr("id","line_element");
             
         point1.raise()
@@ -593,7 +581,8 @@
       // color scale  
       var color = d3.scaleLinear()
           .domain(d3.extent(thresholds))
-          .interpolate(function() { return d3.interpolateRdBu; });  
+          .interpolate(function() { return d3.interpolateRgbBasis(["#152d3b","#295c79","#4794c1","#c3e7f9"])});  
+          //.interpolate(function() { return d3.interpolateRdBu; });  
           
       // initialise contours
       var contours = d3.contours()
@@ -616,8 +605,9 @@
           .attr("x2",p2[0]*width)
           .attr("y1",p1[1]*height)
           .attr("y2",p2[1]*height)
-          .attr("stroke", "#039BE5")
+          .attr("stroke", "#666666")
           .attr("stroke-width", 10)
+          .attr("stroke-linecap","round")
           .attr("id","line_element");
           
 
@@ -663,21 +653,7 @@
 
       dragHandler(svg.selectAll("use"));
 
-			//print(d3.select("#point1").attr("x"))
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-    
+  
     </script>
   </body>
 
