@@ -21,8 +21,7 @@
   <svg id="click" xmlns="http://www.w3.org/2000/svg">
       <defs>
           <g id="pointer" transform="scale(0.5)">
-              <path d="M0-1c-14.5-25.6-14.5-25.7-14.5-33.8c0-8.1,6.5-14.6,14.5-14.6s14.5,6.6,14.5,14.6C14.5-26.7,14.5-26.6,0-1z"></path>
-              <path d="M0-49c7.7,0,14,6.3,14,14.1c0,8,0,8.1-14,32.8c-14-24.7-14-24.9-14-32.8C-14-42.7-7.7-49,0-49 M0-50c-8.3,0-15,6.8-15,15.1 S-15-26.5,0,0c15-26.5,15-26.5,15-34.9S8.3-50,0-50L0-50z"></path>
+              <circle cx="0" cy="0" r="20" />
           </g>
       </defs>
   </svg>
@@ -180,6 +179,7 @@
           
         return creal(results);
       }
+     
       
 			// =============================================================================
       // CONSTRUCT GRID
@@ -199,9 +199,10 @@
           for (i = 0; i < x_res; i++) {
 						grid.push(math.complex(
             	x_limits[0] + xdif*i/(x_res-1)+0.0000000001,
-              y_limits[0] + ydif*j/(y_res-1)+0.0000000001))
+              y_limits[0] + ydif*j/(y_res-1)+0.0000000001));
           }
         }
+        
 				//print(grid)
         return grid; 
       }
@@ -503,8 +504,7 @@
         var A 				= noflowboundary_gradients(vertices,zc,nvec);
         var solvec 		= solution_vector(zc,nvec);
         var s 				= solve_linear_system(A,solvec);
-        var output 		= evaluate(grid, vertices, s);
-
+        output 		= evaluate(grid, vertices, s);
 
         
         // Remove the previous elements
@@ -539,24 +539,22 @@
             .attr("stroke-width", 10)
             .attr("stroke-linecap","round")
             .attr("id","line_element");
-            
+                    
         point1.raise()
         point2.raise()
+        
         
       return;   
       }
       
-      
-      
-      
-      
+
 			// =============================================================================
       // PLOT THE CONTOURS
       // =============================================================================
 
       // set x and y scale to maintain 1:1 aspect ratio  
-      var height 	= 500;
-      var width 	= 500;
+      var height 	= 450;
+      var width 	= 450;
       
       var scaling 	= math.min([width/x_res,height/y_res]);
       //print(scaling)
@@ -567,16 +565,15 @@
           }
       });
         
-      var svg = d3.select("#my_dataviz") // This selects the div
-        .append("svg") // This creates a canvas
+      var svg = d3.select("#click") // This selects the div
           .attr("width", width) // This defines the canvas' width
           .attr("height", height) // This defines the canvas' height
-        .append("g")
-          .attr("transform",
-                "translate(" + 0 + "," + 0 + ")");
       
       // array of threshold values 
-      var thresholds = d3.range(d3.min(output),d3.max(output),(d3.max(output)- d3.min(output))/21);
+      var thresholds = d3.range(
+      	d3.min(output) - (d3.max(output)- d3.min(output))/21,
+        d3.max(output) + (d3.max(output)- d3.min(output))/21,
+        (d3.max(output)- d3.min(output))/21);
 
       // color scale  
       var color = d3.scaleLinear()
@@ -589,7 +586,6 @@
           .size([y_res, x_res])
           .thresholds(thresholds)
           (output);
-
 
       
       // make and project the contours
@@ -620,18 +616,18 @@
           .attr("href", "#pointer")
           .attr("x", p1[0]*width)
           .attr("y", p1[1]*height)
-          .attr("fill", "red")
-          .attr("stroke", "#039BE5")
-          .attr("stroke-width", "1px")
+          .attr("fill", "#c3e7f9")
+          .attr("stroke", "#666666")
+          .attr("stroke-width", "5px")
           .attr("id","point1");
           
       var point2 = svg.append("use")
           .attr("href", "#pointer")
           .attr("x", p2[0]*width)
           .attr("y", p2[1]*height)
-          .attr("fill", "#039BE5")
-          .attr("stroke", "#039BE5")
-          .attr("stroke-width", "1px")
+          .attr("fill", "#c3e7f9")
+          .attr("stroke", "#666666")
+          .attr("stroke-width", "5px")
           .attr("id","point2");
 
       var deltaX, deltaY;
@@ -653,6 +649,51 @@
 
       dragHandler(svg.selectAll("use"));
 
+			
+      // ===========================================================================
+      // This function shifts the contours
+      // ===========================================================================
+      
+      var increment = 0;
+      
+      function shift_contours() {
+
+				threshdif = thresholds[1]-thresholds[0];
+				increment += threshdif/10
+        
+        if (increment >= threshdif){
+        	increment = 0;
+        }
+
+        // initialise contours
+        contours = d3.contours()
+            .size([y_res, x_res])
+            .thresholds(math.subtract(thresholds,increment))
+            (output);
+
+				svg.selectAll("path").remove();
+        
+        // make and project the contours
+        svg.selectAll("path")
+            .data(contours)
+            .enter().append("path")
+                .attr("d", d3.geoPath(projection))
+                .attr("fill", function(d) { return color(d.value); })
+
+				d3.select("#line_element").raise()
+        point1.raise()
+        point2.raise()
+
+				return }
+
+
+  		// Make the contour flow
+      var repater = setInterval(function() {
+        shift_contours();
+      }, 25);
+      
+  
+  
   
     </script>
   </body>
