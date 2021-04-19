@@ -10,7 +10,17 @@
     <script src="https://d3js.org/d3-hsv.v0.1.min.js"></script>
     <script src="https://d3js.org/d3-contour.v1.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-    
+    <style>
+
+      /* Make the chart container fill the page using CSS. */
+      #chart {
+        position: fixed;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+      }
+    </style>
   </head>
 
 <!-- Create a div where the graph will take place -->
@@ -18,17 +28,23 @@
   <svg id="click" xmlns="http://www.w3.org/2000/svg">
       <defs>
           <g id="pointer" transform="scale(0.5)">
-              <circle cx="0" cy="0" r="20" />
+              <circle cx="0" cy="0" r="20" id="dragcircle" />
           </g>
       </defs>
   </svg>
 </div>
 
-  <body>
+
+
+  <body style='overflow:hidden'>
+  
+    
     <script>
     
+
+    
       var p1 				= [0.25, 0.25];
-      var p2 				= [0.85, 0.85];
+      var p2 				= [0.75, 0.75];
       var vertices 	= linspace_complex(p1, p2);
       var zc 			 	= linspace_complex_segments(p1, p2);
       var nvec 			= normal_vector(p1,p2);
@@ -493,8 +509,8 @@
       
       function update() {
       
-      	var p1 				= [d3.select("#point1").attr("x")/width,d3.select("#point1").attr("y")/height];
-        var p2 				= [d3.select("#point2").attr("x")/width,d3.select("#point2").attr("y")/height];
+      	p1 				= [d3.select("#point1").attr("x")/width,d3.select("#point1").attr("y")/height];
+        p2 				= [d3.select("#point2").attr("x")/width,d3.select("#point2").attr("y")/height];
         var vertices 	= linspace_complex(p1, p2);
         var zc 			 	= linspace_complex_segments(p1, p2);
         var nvec 			= normal_vector(p1,p2);
@@ -502,7 +518,7 @@
         var solvec 		= solution_vector(zc,nvec);
         var s 				= solve_linear_system(A,solvec);
         output 		= evaluate(grid, vertices, s);
-
+        
         
         // Remove the previous elements
         d3.select("#line_element").remove();
@@ -550,8 +566,12 @@
       // =============================================================================
 
       // set x and y scale to maintain 1:1 aspect ratio  
-      var height 	= 450;
-      var width 	= 450;
+      // Extract the width and height that was computed by CSS.
+      const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
+      const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
+      
+      var height 	= math.min([vw,vh]); // 450
+      var width 	= math.min([vw,vh]);
       
       var scaling 	= math.min([width/x_res,height/y_res]);
       //print(scaling)
@@ -561,6 +581,8 @@
               this.stream.point(px*scaling, py*scaling);
           }
       });
+      
+			
         
       var svg = d3.select("#click") // This selects the div
           .attr("width", width) // This defines the canvas' width
@@ -584,6 +606,8 @@
           .thresholds(thresholds)
           (output);
 
+      // Resize the drag circles
+      d3.select("#dragcircle").attr("r",20*height/450)
       
       // make and project the contours
       svg.selectAll("path")
@@ -599,7 +623,7 @@
           .attr("y1",p1[1]*height)
           .attr("y2",p2[1]*height)
           .attr("stroke", "#666666")
-          .attr("stroke-width", 10)
+          .attr("stroke-width", 10*height/450)
           .attr("stroke-linecap","round")
           .attr("id","line_element");
           
@@ -615,7 +639,7 @@
           .attr("y", p1[1]*height)
           .attr("fill", "#c3e7f9")
           .attr("stroke", "#666666")
-          .attr("stroke-width", "5px")
+          .attr("stroke-width", 5*height/450)
           .attr("id","point1");
           
       var point2 = svg.append("use")
@@ -624,8 +648,10 @@
           .attr("y", p2[1]*height)
           .attr("fill", "#c3e7f9")
           .attr("stroke", "#666666")
-          .attr("stroke-width", "5px")
+          .attr("stroke-width", 5*height/450)
           .attr("id","point2");
+          
+          //.attr("transform","scale("+string(0.5*height/450)+")");
 
       var deltaX, deltaY;
 
@@ -644,30 +670,10 @@
               update();
           });
 
+
       dragHandler(svg.selectAll("use"));
 
 
-      if ('ontouchstart' in window) {
-          goalView.selectedNode = closestNode(d);
-      }
-
-      var closestNode = function(d){
-          var ghostCircleRadius = 30;
-          var nodes = tree.nodes(goalView.rootNode).reverse();
-          var minDistance = 100000000; //sufficiently large number
-          var returnNode = null;
-          for (var i = 0; i < nodes.length; i++) {
-              var distance = (nodes[i].x0 - d.x0)*(nodes[i].x0 - d.x0) + (nodes[i].y0 - d.y0)*(nodes[i].y0 - d.y0);
-              if (distance > 0){
-                  if (distance < minDistance && distance < ghostCircleRadius*ghostCircleRadius) {
-                      minDistance = distance;
-                      returnNode = nodes[i];
-                  }
-              }
-          }
-
-          return returnNode;
-      };
 
 
 			
