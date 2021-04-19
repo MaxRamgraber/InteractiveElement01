@@ -9,9 +9,6 @@
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://d3js.org/d3-hsv.v0.1.min.js"></script>
     <script src="https://d3js.org/d3-contour.v1.min.js"></script>
-    
-    <script src="https://d3js.org/d3.v4.min.js"></script>
-    <script src="https://d3js.org/d3-contour.v1.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     
   </head>
@@ -648,6 +645,30 @@
           });
 
       dragHandler(svg.selectAll("use"));
+
+
+      if ('ontouchstart' in window) {
+          goalView.selectedNode = closestNode(d);
+      }
+
+      var closestNode = function(d){
+          var ghostCircleRadius = 30;
+          var nodes = tree.nodes(goalView.rootNode).reverse();
+          var minDistance = 100000000; //sufficiently large number
+          var returnNode = null;
+          for (var i = 0; i < nodes.length; i++) {
+              var distance = (nodes[i].x0 - d.x0)*(nodes[i].x0 - d.x0) + (nodes[i].y0 - d.y0)*(nodes[i].y0 - d.y0);
+              if (distance > 0){
+                  if (distance < minDistance && distance < ghostCircleRadius*ghostCircleRadius) {
+                      minDistance = distance;
+                      returnNode = nodes[i];
+                  }
+              }
+          }
+
+          return returnNode;
+      };
+
 
 			
       // ===========================================================================
